@@ -16,13 +16,15 @@
 
 package com.mbcoder.iot.gpslogger;
 
-import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
-import com.esri.arcgisruntime.location.LocationDataSource;
 import com.esri.arcgisruntime.location.NmeaLocationDataSource;
-import com.esri.arcgisruntime.mapping.BasemapStyle;
-import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+import com.pi4j.io.serial.Baud;
+import com.pi4j.io.serial.FlowControl;
+import com.pi4j.io.serial.Parity;
+import com.pi4j.io.serial.Serial;
+import com.pi4j.io.serial.StopBits;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -30,6 +32,9 @@ import javafx.stage.Stage;
 
 public class GPS_Logger extends Application {
 
+    private Context pi4j;
+    private Serial serial;
+    private SerialReader serialReader;
     private String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
 
 
@@ -54,7 +59,57 @@ public class GPS_Logger extends Application {
         Scene scene = new Scene(stackPane);
         stage.setScene(scene);
 
+        //start listening to serial port to get NMEA data
+        NmeaLocationDataSource nmeaLocationDataSource = new NmeaLocationDataSource();
+        var nmeaFuture = nmeaLocationDataSource.startAsync();
+        nmeaFuture.addDoneListener(()-> {
+            initGPS(locationDataSource);
+        });
 
+
+
+    }
+
+    private void initGPS(NmeaLocationDataSource nmeaLocationDataSource) {
+        System.out.println("Starting serial...");
+
+        pi4j = Pi4J.newAutoContext();
+
+        serial = pi4j.create(Serial.newConfigBuilder(pi4j)
+            .baud(Baud._4800)
+            .dataBits_8()
+            .parity(Parity.NONE)
+            .stopBits(StopBits._1)
+            .flowControl(FlowControl.NONE)
+            .id("gps")
+            .provider("pigpio-serial")
+            .device("/dev/ttyUSB0")
+            .build());
+        serial.open();
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Waiting till serial port is open");
+                while (!serial.isOpen()) {
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                //opened now!
+                System.out.println("serial port is open!");
+
+                // Start a thread to handle the incoming data from the serial port
+                serialReader = new SerialReader(serial, nmeaLocationDataSource);
+                Thread serialReaderThread = new Thread(serialReader, "SerialReader");
+                serialReaderThread.setDaemon(true);
+                serialReaderThread.start();
+            }
+        };
+        runnable.run();
     }
 
     /**
@@ -62,9 +117,6 @@ public class GPS_Logger extends Application {
      */
     @Override
     public void stop() {
-
-        if (mapView != null) {
-            mapView.dispose();
-        }
+        serialReader.stopReading();
     }
 }

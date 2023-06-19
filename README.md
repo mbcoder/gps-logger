@@ -2,6 +2,8 @@
 
 This project is a demonstration of an IoT GPS data logger which integrates into the ArcGIS platform.
 
+It has been designed to work on a Raspberry Pi Model 4B with a GPS receiver.
+
 The project uses an early adopter version of the ArcGIS Maps SDK for Java specifically compiled to work with Arm Linux platforms such as the Raspberry Pi or Jenson Orin units.  The Maps SDK for Arm Linux can be requested by emailing ARM64LinuxNative@esri.com.  This will install the libraries needed for this app in a Maven Local instance.  This is a temporary way of getting the SDK whilst it is in Beta.  Subsequent releases will be available in a public maven repository.
 
 The project includes the Gradle wrapper, so there is no need to install Gradle to run the app.
