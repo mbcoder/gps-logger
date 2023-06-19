@@ -14,18 +14,24 @@
  * under the License.
  */
 
-package com.mycompany.app;
+package com.mbcoder.iot.gpslogger;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.location.LocationDataSource;
+import com.esri.arcgisruntime.location.NmeaLocationDataSource;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-public class App extends Application {
+public class GPS_Logger extends Application {
+
+    private String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
+
 
     private MapView mapView;
 
@@ -38,7 +44,7 @@ public class App extends Application {
     public void start(Stage stage) {
 
         // set the title and size of the stage and show it
-        stage.setTitle("My Map App");
+        stage.setTitle("GPS Logger");
         stage.setWidth(800);
         stage.setHeight(700);
         stage.show();
@@ -48,22 +54,7 @@ public class App extends Application {
         Scene scene = new Scene(stackPane);
         stage.setScene(scene);
 
-        // Note: it is not best practice to store API keys in source code.
-        // An API key is required to enable access to services, web maps, and web scenes hosted in ArcGIS Online.
-        // If you haven't already, go to your developer dashboard to get your API key.
-        // Please refer to https://developers.arcgis.com/java/get-started/ for more information
-        String yourApiKey = "YOUR_API_KEY";
-        ArcGISRuntimeEnvironment.setApiKey(yourApiKey);
 
-        // create a MapView to display the map and add it to the stack pane
-        mapView = new MapView();
-        stackPane.getChildren().add(mapView);
-
-        // create an ArcGISMap with an imagery basemap
-        ArcGISMap map = new ArcGISMap(BasemapStyle.ARCGIS_IMAGERY);
-
-        // display the map by setting the map on the map view
-        mapView.setMap(map);
     }
 
     /**

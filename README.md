@@ -1,6 +1,8 @@
-# java-gradle-starter-project
+# GPS Logger project
 
-Here is a starter project for the ArcGIS Maps SDK for Java with Gradle. 
+This project is a demonstration of an IoT GPS data logger which integrates into the ArcGIS platform.
+
+The project uses an early adopter version of the ArcGIS Maps SDK for Java specifically compiled to work with Arm Linux platforms such as the Raspberry Pi or Jenson Orin units.  The Maps SDK for Arm Linux can be requested by emailing ARM64LinuxNative@esri.com.  This will install the libraries needed for this app in a Maven Local instance.  This is a temporary way of getting the SDK whilst it is in Beta.  Subsequent releases will be available in a public maven repository.
 
 The project includes the Gradle wrapper, so there is no need to install Gradle to run the app.
 
@@ -19,17 +21,6 @@ The app launches a window displaying a map.
 5. In the Gradle view, double-click `copyNatives` under _Tasks > build_. This will unpack the native library dependencies to $USER_HOME/.arcgis.
 6. In the Gradle view, double-click `run` under _Tasks > application_ to run the app.
 
-### Eclipse
-
-1. Open Eclipse and select _File > Import_.
-2. In the import wizard, choose _Gradle > Existing Gradle Project_, then click _Next_.
-3. Select the java-gradle-starter-project directory as the project root directory.
-4. Click _Finish_ to complete the import.
-5. Select _Project > Properties_ . In _Java Build Path_, ensure that under the Libraries tab, _Modulepath_ is set to JRE System Library (JavaSE-11). In _Java Compiler_, ensure that the _Use compliance from execution environment 'JavaSE-11' on the 'Java Build Path'_ checkbox is selected.
-6. Right-click the project in the Project Explorer or Package Explorer and choose _Gradle > Refresh Gradle project_.
-7. Open the Gradle Tasks view with _Window > Show View > Other... > Gradle > Gradle Tasks_.
-8. In the Gradle Tasks view, double-click `copyNatives` under _java-gradle-starter-project > build_. This will unpack the native library dependencies to $USER_HOME/.arcgis.
-9. In the Gradle Tasks view, double-click `run` under _java-gradle-starter-project > application_ to run the app.
 
 ### Command Line
 

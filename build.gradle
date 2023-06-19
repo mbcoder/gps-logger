@@ -48,8 +48,8 @@ javafx {
 }
 
 application {
-    mainModule = "com.mycompany.app"
-    mainClass = "com.mycompany.app.App"
+    mainModule = "com.mbcoder.iot.gpslogger"
+    mainClass = "com.mbcoder.iot.gpslogger.GPS_Logger"
 }
 
 task copyNatives(type: Copy) {
