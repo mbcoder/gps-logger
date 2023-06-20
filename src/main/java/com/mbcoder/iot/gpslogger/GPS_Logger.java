@@ -64,6 +64,11 @@ public class GPS_Logger extends Application {
         var nmeaFuture = nmeaLocationDataSource.startAsync();
         nmeaFuture.addDoneListener(()-> {
             initGPS(nmeaLocationDataSource);
+
+            // listener for location updates
+            nmeaLocationDataSource.addLocationChangedListener(listener -> {
+                System.out.println("pos " + listener.getLocation().getPosition());
+            });
         });
 
 
