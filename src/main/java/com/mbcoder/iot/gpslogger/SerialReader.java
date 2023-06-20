@@ -40,6 +40,14 @@ public class SerialReader implements Runnable {
         var available = serial.available();
 
         if (available > 0) {
+          byte b = (byte) br.read();
+
+          byte[] ba = new byte[1];
+          ba[0] = b;
+          nmeaLocationDataSource.pushData(ba);
+
+          /*
+
           for (int i = 0; i < available; i++) {
             byte b = (byte) br.read();
             if (b < 32) {
@@ -53,7 +61,11 @@ public class SerialReader implements Runnable {
             } else {
               line += (char) b;
             }
+
+
           }
+
+           */
         } else {
           Thread.sleep(10);
         }
