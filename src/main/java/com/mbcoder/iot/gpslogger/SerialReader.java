@@ -46,7 +46,7 @@ public class SerialReader implements Runnable {
               // All non-string bytes are handled as line breaks
               if (!line.isEmpty()) {
                 // Here we should add code to parse the data to a GPS data object
-                System.out.println("Data: '" + line + "'");
+                //System.out.println("Data: '" + line + "'");
                 nmeaLocationDataSource.pushData(line.getBytes(StandardCharsets.UTF_8));
                 line = "";
               }
