@@ -63,6 +63,9 @@ public class GPS_Logger extends Application {
         NmeaLocationDataSource nmeaLocationDataSource = new NmeaLocationDataSource();
         var nmeaFuture = nmeaLocationDataSource.startAsync();
         nmeaFuture.addDoneListener(()-> {
+
+
+
             initGPS(nmeaLocationDataSource);
 
             System.out.println("adding location changed listener");
@@ -74,7 +77,14 @@ public class GPS_Logger extends Application {
             System.out.println("adding satellites changed listener");
             nmeaLocationDataSource.addSatellitesChangedListener(satellitesChangedEvent -> {
                 System.out.println("satellites :" + satellitesChangedEvent.getSatelliteInfos().size());
+            });
 
+            nmeaLocationDataSource.addStatusChangedListener(statusChangedEvent -> {
+                System.out.println("status changed :" + statusChangedEvent.getStatus());
+            });
+
+            nmeaLocationDataSource.addErrorChangedListener(errorChangedEvent -> {
+                System.out.println("error changed :" + errorChangedEvent.toString());
             });
         });
 
