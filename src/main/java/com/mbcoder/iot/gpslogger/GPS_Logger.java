@@ -59,13 +59,13 @@ public class GPS_Logger extends Application {
         Scene scene = new Scene(stackPane);
         stage.setScene(scene);
 
+        //testNmta();
+
+
         //start listening to serial port to get NMEA data
         NmeaLocationDataSource nmeaLocationDataSource = new NmeaLocationDataSource();
         var nmeaFuture = nmeaLocationDataSource.startAsync();
         nmeaFuture.addDoneListener(()-> {
-
-
-
             initGPS(nmeaLocationDataSource);
 
             System.out.println("adding location changed listener");
@@ -89,6 +89,81 @@ public class GPS_Logger extends Application {
         });
 
 
+
+
+
+    }
+
+    private void testNmta() {
+        /*
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPGSV,3,1,12,10,00,000,13,31,00,000,13,01,00,000,,02,00,000,*78'
+        Data: '$GPGSV,3,2,12,03,00,000,,04,00,000,,05,00,000,,06,00,000,*7F'
+        Data: '$GPGSV,3,3,12,07,00,000,,08,00,000,,09,00,000,,11,00,000,*7C'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPGSV,3,1,12,01,00,000,,02,00,000,,03,00,000,,04,00,000,*7C'
+        Data: '$GPGSV,3,2,12,05,00,000,,06,00,000,,07,00,000,,08,00,000,*77'
+        Data: '$GPGSV,3,3,12,09,00,000,,10,00,000,,11,00,000,,12,00,000,*71'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPGSV,3,1,12,02,00,000,14,21,00,000,13,01,00,000,,03,00,000,*7C'
+        Data: '$GPGSV,3,2,12,04,00,000,,05,00,000,,06,00,000,,07,00,000,*7B'
+        Data: '$GPGSV,3,3,12,08,00,000,,09,00,000,,10,00,000,,11,00,000,*7A'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
+        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
+        Data: '$GPGSV,3,1,12,28,00,000,14,01,00,000,,02,00,000,,03,00,000,*77'
+        Data: '$GPGSV,3,2,12,04,00,000,,05,00,000,,06,00,000,,07,00,000,*7B'
+        Data: '$GPGSV,3,3,12,08,00,000,,09,00,000,,10,00,000,,11,00,000,*7A'
+        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+
+         */
 
     }
 
