@@ -72,20 +72,10 @@ public class GPS_Logger extends Application {
             // listener for location updates
             nmeaLocationDataSource.addLocationChangedListener(listener -> {
                 System.out.println("pos :" + listener.getLocation().getPosition());
+                System.out.println("speed :" + listener.getLocation().getVelocity());
+
             });
 
-            System.out.println("adding satellites changed listener");
-            nmeaLocationDataSource.addSatellitesChangedListener(satellitesChangedEvent -> {
-                System.out.println("satellites :" + satellitesChangedEvent.getSatelliteInfos().size());
-            });
-
-            nmeaLocationDataSource.addStatusChangedListener(statusChangedEvent -> {
-                System.out.println("status changed :" + statusChangedEvent.getStatus());
-            });
-
-            nmeaLocationDataSource.addErrorChangedListener(errorChangedEvent -> {
-                System.out.println("error changed :" + errorChangedEvent.toString());
-            });
         });
 
 
