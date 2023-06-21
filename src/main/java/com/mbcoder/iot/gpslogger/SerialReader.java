@@ -46,7 +46,10 @@ public class SerialReader implements Runnable {
           //ba[0] = b;
           //nmeaLocationDataSource.pushData(ba);
 
+          byte[] bytes = {(byte) br.read()};
+          nmeaLocationDataSource.pushData(bytes);
 
+          /*
 
           for (int i = 0; i < available; i++) {
             byte b = (byte) br.read();
@@ -55,7 +58,7 @@ public class SerialReader implements Runnable {
               if (!line.isEmpty()) {
                 line += (char) b;
                 // Here we should add code to parse the data to a GPS data object
-                System.out.println("Data: '" + line + "'");
+                //System.out.println(line);
                 nmeaLocationDataSource.pushData(line.getBytes(StandardCharsets.UTF_8));
                 line = "";
               }
@@ -65,6 +68,8 @@ public class SerialReader implements Runnable {
 
 
           }
+
+           */
 
 
         } else {
