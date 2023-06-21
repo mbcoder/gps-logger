@@ -55,7 +55,7 @@ public class SerialReader implements Runnable {
               if (!line.isEmpty()) {
                 // Here we should add code to parse the data to a GPS data object
                 //System.out.println("Data: '" + line + "'");
-                nmeaLocationDataSource.pushData(line.getBytes(StandardCharsets.US_ASCII));
+                nmeaLocationDataSource.pushData(line.getBytes());
                 line = "";
               }
             } else {
