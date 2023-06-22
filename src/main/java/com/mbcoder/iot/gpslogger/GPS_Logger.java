@@ -16,8 +16,19 @@
 
 package com.mbcoder.iot.gpslogger;
 
+import com.esri.arcgisruntime.concurrent.Job;
+import com.esri.arcgisruntime.data.Feature;
+import com.esri.arcgisruntime.data.Geodatabase;
+import com.esri.arcgisruntime.data.GeodatabaseFeatureTable;
+import com.esri.arcgisruntime.data.SyncModel;
+import com.esri.arcgisruntime.geometry.Envelope;
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.location.NmeaLocationDataSource;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.tasks.geodatabase.GenerateGeodatabaseJob;
+import com.esri.arcgisruntime.tasks.geodatabase.GenerateGeodatabaseParameters;
+import com.esri.arcgisruntime.tasks.geodatabase.GeodatabaseSyncTask;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.serial.Baud;
@@ -25,8 +36,15 @@ import com.pi4j.io.serial.FlowControl;
 import com.pi4j.io.serial.Parity;
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.StopBits;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -37,8 +55,15 @@ public class GPS_Logger extends Application {
     private SerialReader serialReader;
     private String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
 
+    private Geodatabase geodatabase;
+    private GeodatabaseFeatureTable table;
+    private GenerateGeodatabaseJob generateGeodatabaseJob;
+    private GeodatabaseSyncTask syncTask;
 
-    private MapView mapView;
+    private Feature latestPosition;  // the latest position read from the GPS
+    private boolean featureUpdated = false;  // flag set to true every time we update the latestPosition from the GPS.
+
+    private Timer loggingTimer; // timer for logging to local geodatabase
 
     public static void main(String[] args) {
 
@@ -59,9 +84,72 @@ public class GPS_Logger extends Application {
         Scene scene = new Scene(stackPane);
         stage.setScene(scene);
 
-        //testNmta();
+        HBox hBox = new HBox();
+        stackPane.getChildren().add(hBox);
+        Button getGDB = new Button("get gdb");
+        getGDB.setOnAction(event -> {
+            downloadOfflineDB();
+        });
+        hBox.getChildren().add(getGDB);
+
+        Button openGDB = new Button("open gdb");
+        openGDB.setOnAction(event -> {
+            System.out.println("opening gdb");
+
+            openGeodatabase();
+
+        });
+        hBox.getChildren().add(openGDB);
+
+        Button btnAddFeature = new Button("add feature");
+        btnAddFeature.setOnAction(event -> {
+            System.out.println("adding feature");
+            addFeature();
+        });
+        hBox.getChildren().add(btnAddFeature);
+
+        Button btnSync = new Button("Sync");
+        btnSync.setOnAction(event -> {
+            System.out.println("sync");
+            System.out.println("has local edits " + table.hasLocalEdits());
+            syncGeodatabase();
+
+        });
+        hBox.getChildren().add(btnSync);
+
+        Button btnStartGPSUpdate = new Button("start GPS");
+        btnStartGPSUpdate.setOnAction(event -> {
+            startGPSUpdate();
+        });
+        hBox.getChildren().add(btnStartGPSUpdate);
 
 
+        Button btnStartLogger = new Button("start logging");
+        btnStartLogger.setOnAction(event -> {
+            startLogging();
+        });
+        hBox.getChildren().add(btnStartLogger);
+    }
+
+    private void startLogging() {
+        loggingTimer = new Timer();
+
+        loggingTimer.schedule( new TimerTask() {
+            public void run() {
+                // log position to db if there is a new gps update
+                System.out.println("logging position");
+
+                if (featureUpdated) {
+                    System.out.println("logging new position");
+                    table.addFeatureAsync(latestPosition);
+                }
+
+            }
+        }, 1000, 10000);
+    }
+
+
+    private void startGPSUpdate() {
         //start listening to serial port to get NMEA data
         NmeaLocationDataSource nmeaLocationDataSource = new NmeaLocationDataSource();
         var nmeaFuture = nmeaLocationDataSource.startAsync();
@@ -73,88 +161,136 @@ public class GPS_Logger extends Application {
             nmeaLocationDataSource.addLocationChangedListener(listener -> {
                 System.out.println("pos :" + listener.getLocation().getPosition());
                 System.out.println("speed :" + listener.getLocation().getVelocity());
+                System.out.println("direction :" + listener.getLocation().getCourse());
 
+                // create default attributes for the feature
+                Map<String, Object> attributes = new HashMap<>();
+                attributes.put("TrackID", "T1");
+                attributes.put("Speed", listener.getLocation().getVelocity());
+                attributes.put("Heading", listener.getLocation().getCourse());
+
+                // update the latest position feature
+                latestPosition = table.createFeature(attributes, listener.getLocation().getPosition());
+
+                // set flag to say there is a position update
+                featureUpdated = true;
+            });
+        });
+    }
+
+    private void syncGeodatabase() {
+        syncTask = new GeodatabaseSyncTask(featureLayerURL);
+
+        syncTask.loadAsync();
+        syncTask.addDoneLoadingListener(()-> {
+            System.out.println("sync task load status " + syncTask.getLoadStatus());
+
+            var syncParamsFuture =  syncTask.createDefaultSyncGeodatabaseParametersAsync(geodatabase);
+            syncParamsFuture.addDoneListener(()-> {
+                try {
+                    var syncJob  = syncTask.syncGeodatabase(syncParamsFuture.get(), geodatabase);
+                    syncJob.start();
+                    syncJob.addJobDoneListener(()-> {
+                        System.out.println("sync job done status " + syncJob.getStatus());
+                    });
+
+                    syncJob.addProgressChangedListener(()-> {
+                        System.out.println("progress!");
+                    });
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
             });
 
         });
 
+    }
 
+    private void addFeature() {
+        // create default attributes for the feature
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("TrackID", "T1");
+        attributes.put("Speed", 10.0);
+        attributes.put("Heading", 90.0);
 
+        Point point = new Point(10000,10000, SpatialReferences.getWebMercator());
 
+        Feature feature = table.createFeature(attributes, point);
+
+        // check if feature can be added to feature table
+        if (table.canAdd()) {
+            // add the new feature to the feature table and to server
+            table.addFeatureAsync(feature);
+        } else {
+            System.out.println("Cannot add a feature to this feature table");
+        }
 
     }
 
-    private void testNmta() {
-        /*
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPGSV,3,1,12,10,00,000,13,31,00,000,13,01,00,000,,02,00,000,*78'
-        Data: '$GPGSV,3,2,12,03,00,000,,04,00,000,,05,00,000,,06,00,000,*7F'
-        Data: '$GPGSV,3,3,12,07,00,000,,08,00,000,,09,00,000,,11,00,000,*7C'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPGSV,3,1,12,01,00,000,,02,00,000,,03,00,000,,04,00,000,*7C'
-        Data: '$GPGSV,3,2,12,05,00,000,,06,00,000,,07,00,000,,08,00,000,*77'
-        Data: '$GPGSV,3,3,12,09,00,000,,10,00,000,,11,00,000,,12,00,000,*71'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPGSV,3,1,12,02,00,000,14,21,00,000,13,01,00,000,,03,00,000,*7C'
-        Data: '$GPGSV,3,2,12,04,00,000,,05,00,000,,06,00,000,,07,00,000,*7B'
-        Data: '$GPGSV,3,3,12,08,00,000,,09,00,000,,10,00,000,,11,00,000,*7A'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
-        Data: '$GPGGA,,,,,,0,00,,,M,0.0,M,,0000*48'
-        Data: '$GPGSA,A,1,,,,,,,,,,,,,,,*1E'
-        Data: '$GPGSV,3,1,12,28,00,000,14,01,00,000,,02,00,000,,03,00,000,*77'
-        Data: '$GPGSV,3,2,12,04,00,000,,05,00,000,,06,00,000,,07,00,000,*7B'
-        Data: '$GPGSV,3,3,12,08,00,000,,09,00,000,,10,00,000,,11,00,000,*7A'
-        Data: '$GPRMC,,V,,,,,,,,,,N*53'
+    private void openGeodatabase() {
+        geodatabase = new Geodatabase("./gpsdata.geodatabase");
 
-         */
+        geodatabase.loadAsync();
+        geodatabase.addDoneLoadingListener(()-> {
+            System.out.println("gdb load status :" + geodatabase.getLoadStatus());
 
+            table = geodatabase.getGeodatabaseFeatureTableByServiceLayerId(0);
+            table.loadAsync();
+            table.addDoneLoadingListener(()-> {
+                System.out.println("opening table " + table.getDisplayName());
+                for (var field : table.getFields()) {
+                    System.out.println("field : " + field.getName());
+                }
+            });
+        });
+    }
+
+    private void downloadOfflineDB() {
+        System.out.println("downloading gdb");
+
+        syncTask = new GeodatabaseSyncTask(featureLayerURL);
+
+        syncTask.loadAsync();
+        syncTask.addDoneLoadingListener(()-> {
+            System.out.println("load status " + syncTask.getLoadStatus());
+
+            Envelope envelope = new Envelope(0,0,0,0, SpatialReferences.getWebMercator());
+
+            var paramsFuture = syncTask.createDefaultGenerateGeodatabaseParametersAsync(envelope);
+            paramsFuture.addDoneListener(()-> {
+                System.out.println("params loaded ");
+                try {
+                    GenerateGeodatabaseParameters parameters = paramsFuture.get();
+                    var layerOptions = parameters.getLayerOptions();
+                    for (var option : layerOptions) {
+                        System.out.println("layer option " + option.getLayerId());
+                    }
+
+
+                    generateGeodatabaseJob = syncTask.generateGeodatabase(parameters, "./gpsdata.geodatabase");
+
+                    generateGeodatabaseJob.start();
+                    generateGeodatabaseJob.addJobDoneListener(()-> {
+                        System.out.println("job status :" + generateGeodatabaseJob.getStatus());
+
+                        if (generateGeodatabaseJob.getStatus() == Job.Status.FAILED) {
+                            System.out.println("error :" + generateGeodatabaseJob.getError().getMessage());
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            });
+
+
+
+        });
     }
 
     private void initGPS(NmeaLocationDataSource nmeaLocationDataSource) {
@@ -174,27 +310,24 @@ public class GPS_Logger extends Application {
             .build());
         serial.open();
 
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Waiting till serial port is open");
-                while (!serial.isOpen()) {
-                    try {
-                        Thread.sleep(250);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+        Runnable runnable = () -> {
+            System.out.println("Waiting till serial port is open");
+            while (!serial.isOpen()) {
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
-
-                //opened now!
-                System.out.println("serial port is open!");
-
-                // Start a thread to handle the incoming data from the serial port
-                serialReader = new SerialReader(serial, nmeaLocationDataSource);
-                Thread serialReaderThread = new Thread(serialReader, "SerialReader");
-                serialReaderThread.setDaemon(true);
-                serialReaderThread.start();
             }
+
+            //opened now!
+            System.out.println("serial port is open!");
+
+            // Start a thread to handle the incoming data from the serial port
+            serialReader = new SerialReader(serial, nmeaLocationDataSource);
+            Thread serialReaderThread = new Thread(serialReader, "SerialReader");
+            serialReaderThread.setDaemon(true);
+            serialReaderThread.start();
         };
         runnable.run();
     }
