@@ -183,6 +183,8 @@ public class GPS_Logger extends Application {
                 System.out.println("feature created " + latestPosition.getGeometry().getGeometryType());
                 System.out.println("feature attributes  " + latestPosition.getAttributes());
 
+                table.addFeatureAsync(latestPosition);
+
                 // set flag to say there is a position update
                 featureUpdated = true;
             });
@@ -346,6 +348,6 @@ public class GPS_Logger extends Application {
     @Override
     public void stop() {
         if (serialReader != null) serialReader.stopReading();
-        loggingTimer.cancel();
+        if (loggingTimer != null) loggingTimer.cancel();
     }
 }
