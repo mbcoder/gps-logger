@@ -123,6 +123,11 @@ public class GPS_Logger extends Application {
         });
         hBox.getChildren().add(btnStartGPSUpdate);
 
+        Button btnStopGPSUpdate = new Button("stop GPS");
+        btnStopGPSUpdate.setOnAction(event -> {
+
+        });
+
 
         Button btnStartLogger = new Button("start logging");
         btnStartLogger.setOnAction(event -> {
@@ -208,15 +213,17 @@ public class GPS_Logger extends Application {
             });
 
         });
-
     }
 
     private void addFeature() {
+
+        double speed = 11.11;
+        double heading = 91.11;
         // create default attributes for the feature
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("TrackID", "T1");
-        attributes.put("Speed", 10.0);
-        attributes.put("Heading", 90.0);
+        attributes.put("Speed", speed);
+        attributes.put("Heading", heading);
 
         Point point = new Point(10000,10000, SpatialReferences.getWebMercator());
 
@@ -226,6 +233,7 @@ public class GPS_Logger extends Application {
         if (table.canAdd()) {
             // add the new feature to the feature table and to server
             table.addFeatureAsync(feature);
+
         } else {
             System.out.println("Cannot add a feature to this feature table");
         }
@@ -271,7 +279,6 @@ public class GPS_Logger extends Application {
                         System.out.println("layer option " + option.getLayerId());
                     }
 
-
                     generateGeodatabaseJob = syncTask.generateGeodatabase(parameters, "./gpsdata.geodatabase");
 
                     generateGeodatabaseJob.start();
@@ -287,12 +294,7 @@ public class GPS_Logger extends Application {
                 } catch (ExecutionException e) {
                     throw new RuntimeException(e);
                 }
-
-
             });
-
-
-
         });
     }
 
@@ -340,7 +342,7 @@ public class GPS_Logger extends Application {
      */
     @Override
     public void stop() {
-        serialReader.stopReading();
+        if (serialReader != null) serialReader.stopReading();
         loggingTimer.cancel();
     }
 }
