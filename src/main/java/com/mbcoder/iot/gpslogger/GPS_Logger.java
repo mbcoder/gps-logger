@@ -177,13 +177,13 @@ public class GPS_Logger extends Application {
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
+                Point latestPoint = listener.getLocation().getPosition();
+
                 // update the latest position feature
-                latestPosition = table.createFeature(attributes, listener.getLocation().getPosition());
+                latestPosition = table.createFeature(attributes, latestPoint);
 
-                System.out.println("feature created " + latestPosition.getGeometry().getGeometryType());
+                System.out.println("feature created " + latestPoint.toString());
                 System.out.println("feature attributes  " + latestPosition.getAttributes());
-
-                table.addFeatureAsync(latestPosition);
 
                 // set flag to say there is a position update
                 featureUpdated = true;
@@ -230,14 +230,18 @@ public class GPS_Logger extends Application {
         attributes.put("Speed", speed);
         attributes.put("Heading", heading);
 
-        Point point = new Point(10000,10000, SpatialReferences.getWebMercator());
+        Point point = new Point(1,51, SpatialReferences.getWgs84());
 
         Feature feature = table.createFeature(attributes, point);
 
         // check if feature can be added to feature table
         if (table.canAdd()) {
             // add the new feature to the feature table and to server
-            table.addFeatureAsync(feature);
+            var future = table.addFeatureAsync(feature);
+            future.addDoneListener(() -> {
+                System.out.println("added feature done");
+                System.out.println("local edits " + table.hasLocalEdits());
+            });
 
         } else {
             System.out.println("Cannot add a feature to this feature table");
@@ -259,6 +263,7 @@ public class GPS_Logger extends Application {
                 for (var field : table.getFields()) {
                     System.out.println("field : " + field.getName());
                 }
+                System.out.println("local edits " + table.hasLocalEdits());
             });
         });
     }
