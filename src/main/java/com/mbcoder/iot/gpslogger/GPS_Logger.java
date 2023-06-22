@@ -142,6 +142,9 @@ public class GPS_Logger extends Application {
                 if (featureUpdated) {
                     System.out.println("logging new position");
                     table.addFeatureAsync(latestPosition);
+
+                    // flag we've read it
+                    featureUpdated = false;
                 }
 
             }
@@ -165,7 +168,7 @@ public class GPS_Logger extends Application {
 
                 // create default attributes for the feature
                 Map<String, Object> attributes = new HashMap<>();
-                attributes.put("TrackID", "T1");
+                attributes.put("TrackID", "GPS Test");
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
@@ -338,5 +341,6 @@ public class GPS_Logger extends Application {
     @Override
     public void stop() {
         serialReader.stopReading();
+        loggingTimer.cancel();
     }
 }
