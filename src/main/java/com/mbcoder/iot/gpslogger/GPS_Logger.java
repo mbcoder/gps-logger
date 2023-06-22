@@ -148,6 +148,8 @@ public class GPS_Logger extends Application {
                     System.out.println("logging new position");
                     table.addFeatureAsync(latestPosition);
 
+                    System.out.println("changes in db? " + table.hasLocalEdits());
+
                     // flag we've read it
                     featureUpdated = false;
                 }
@@ -167,9 +169,10 @@ public class GPS_Logger extends Application {
             System.out.println("adding location changed listener");
             // listener for location updates
             nmeaLocationDataSource.addLocationChangedListener(listener -> {
-                System.out.println("pos :" + listener.getLocation().getPosition());
-                System.out.println("speed :" + listener.getLocation().getVelocity());
-                System.out.println("direction :" + listener.getLocation().getCourse());
+                //System.out.println("pos :" + listener.getLocation().getPosition());
+                //System.out.println("speed :" + listener.getLocation().getVelocity());
+                //System.out.println("direction :" + listener.getLocation().getCourse());
+                System.out.print(".");
 
                 // create default attributes for the feature
                 Map<String, Object> attributes = new HashMap<>();
@@ -182,8 +185,8 @@ public class GPS_Logger extends Application {
                 // update the latest position feature
                 latestPosition = table.createFeature(attributes, latestPoint);
 
-                System.out.println("feature created " + latestPoint.toString());
-                System.out.println("feature attributes  " + latestPosition.getAttributes());
+                //System.out.println("feature created " + latestPoint.toString());
+                //System.out.println("feature attributes  " + latestPosition.getAttributes());
 
                 // set flag to say there is a position update
                 featureUpdated = true;
