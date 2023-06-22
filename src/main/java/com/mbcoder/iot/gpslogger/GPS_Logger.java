@@ -142,7 +142,7 @@ public class GPS_Logger extends Application {
         loggingTimer.schedule( new TimerTask() {
             public void run() {
                 // log position to db if there is a new gps update
-                System.out.println("logging position");
+                System.out.println("logging triggered after 10 seconds");
 
                 if (featureUpdated) {
                     System.out.println("logging new position");
@@ -179,6 +179,9 @@ public class GPS_Logger extends Application {
 
                 // update the latest position feature
                 latestPosition = table.createFeature(attributes, listener.getLocation().getPosition());
+
+                System.out.println("feature created " + latestPosition.getGeometry().getGeometryType());
+                System.out.println("feature attributes  " + latestPosition.getAttributes());
 
                 // set flag to say there is a position update
                 featureUpdated = true;
