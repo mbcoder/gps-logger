@@ -180,7 +180,7 @@ public class GPS_Logger extends Application {
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
-                Point latestPoint = listener.getLocation().getPosition();
+                Point latestPoint = new Point(-1,53, SpatialReferences.getWgs84());  //listener.getLocation().getPosition();
 
                 // update the latest position feature
                 latestPosition = table.createFeature(attributes, latestPoint);
