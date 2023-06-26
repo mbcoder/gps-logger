@@ -20,12 +20,10 @@ import com.esri.arcgisruntime.concurrent.Job;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.Geodatabase;
 import com.esri.arcgisruntime.data.GeodatabaseFeatureTable;
-import com.esri.arcgisruntime.data.SyncModel;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.location.NmeaLocationDataSource;
-import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.tasks.geodatabase.GenerateGeodatabaseJob;
 import com.esri.arcgisruntime.tasks.geodatabase.GenerateGeodatabaseParameters;
 import com.esri.arcgisruntime.tasks.geodatabase.GeodatabaseSyncTask;
@@ -86,56 +84,53 @@ public class GPS_Logger extends Application {
 
         HBox hBox = new HBox();
         stackPane.getChildren().add(hBox);
-        Button getGDB = new Button("get gdb");
-        getGDB.setOnAction(event -> {
+
+        // Button to get offline geodatabase
+        Button btnGetGDB = new Button("Get offline gdb");
+        btnGetGDB.setOnAction(event -> {
             downloadOfflineDB();
         });
-        hBox.getChildren().add(getGDB);
+        hBox.getChildren().add(btnGetGDB);
 
-        Button openGDB = new Button("open gdb");
-        openGDB.setOnAction(event -> {
+        // Button to open offline geodatabase
+        Button btnOpenGDB = new Button("open offline gdb");
+        btnOpenGDB.setOnAction(event -> {
             System.out.println("opening gdb");
-
             openGeodatabase();
-
         });
-        hBox.getChildren().add(openGDB);
+        hBox.getChildren().add(btnOpenGDB);
 
-        Button btnAddFeature = new Button("add feature");
-        btnAddFeature.setOnAction(event -> {
-            System.out.println("adding feature");
-            addFeature();
-        });
-        hBox.getChildren().add(btnAddFeature);
-
-        Button btnSync = new Button("Sync");
+        // Button to sync gps positions collected into the hosted feature service
+        Button btnSync = new Button("Sync data");
         btnSync.setOnAction(event -> {
-            System.out.println("sync");
-            System.out.println("has local edits " + table.hasLocalEdits());
+            System.out.println("sync data");
             syncGeodatabase();
 
         });
         hBox.getChildren().add(btnSync);
 
+        // Button to open the serial port and start processing GPS data
         Button btnStartGPSUpdate = new Button("start GPS");
         btnStartGPSUpdate.setOnAction(event -> {
             startGPSUpdate();
         });
         hBox.getChildren().add(btnStartGPSUpdate);
 
-        Button btnStopGPSUpdate = new Button("stop GPS");
-        btnStopGPSUpdate.setOnAction(event -> {
-
-        });
-
-
+        // Button to start recording the GPS position to offline gdb every 10 seconds
         Button btnStartLogger = new Button("start logging");
         btnStartLogger.setOnAction(event -> {
             startLogging();
         });
         hBox.getChildren().add(btnStartLogger);
+
     }
 
+    /**
+     * Method to start logging GPS data into the geodatabase.
+     *
+     * GPS data is reported very frequently, but this method only records new
+     * data at least every 10 seconds to limit the amont of data recorded.
+     */
     private void startLogging() {
         loggingTimer = new Timer();
 
@@ -148,8 +143,6 @@ public class GPS_Logger extends Application {
                     System.out.println("logging new position");
                     table.addFeatureAsync(latestPosition);
 
-                    System.out.println("changes in db? " + table.hasLocalEdits());
-
                     // flag we've read it
                     featureUpdated = false;
                 }
@@ -158,7 +151,11 @@ public class GPS_Logger extends Application {
         }, 1000, 10000);
     }
 
-
+    /**
+     * Method to connect to the serial port with the UDB GPS device and listen for incoming NMEA sentenses
+     *
+     * When NMEA data is received, this is processed by the NMEALocationDataSource class to provide location information.
+     */
     private void startGPSUpdate() {
         //start listening to serial port to get NMEA data
         NmeaLocationDataSource nmeaLocationDataSource = new NmeaLocationDataSource();
@@ -169,10 +166,6 @@ public class GPS_Logger extends Application {
             System.out.println("adding location changed listener");
             // listener for location updates
             nmeaLocationDataSource.addLocationChangedListener(listener -> {
-                //System.out.println("pos :" + listener.getLocation().getPosition());
-                //System.out.println("speed :" + listener.getLocation().getVelocity());
-                //System.out.println("direction :" + listener.getLocation().getCourse());
-                System.out.print(".");
 
                 // create default attributes for the feature
                 Map<String, Object> attributes = new HashMap<>();
@@ -180,17 +173,11 @@ public class GPS_Logger extends Application {
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
-                // this fails:
-                //Point latestPoint = listener.getLocation().getPosition();
-
-                // this works
+                // Copy the location into a Point class ready for creating an updated fature
                 Point latestPoint = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
 
                 // update the latest position feature
                 latestPosition = table.createFeature(attributes, latestPoint);
-
-                //System.out.println("feature created " + latestPoint.toString());
-                //System.out.println("feature attributes  " + latestPosition.getAttributes());
 
                 // set flag to say there is a position update
                 featureUpdated = true;
@@ -198,6 +185,10 @@ public class GPS_Logger extends Application {
         });
     }
 
+    /**
+     * A method to sync gps data collected whilst offline into the hosted feature service.   This process will be called
+     * when there is network connectivity to the feature service.
+     */
     private void syncGeodatabase() {
         syncTask = new GeodatabaseSyncTask(featureLayerURL);
 
@@ -227,35 +218,9 @@ public class GPS_Logger extends Application {
         });
     }
 
-    private void addFeature() {
-
-        double speed = 11.11;
-        double heading = 91.11;
-        // create default attributes for the feature
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("TrackID", "T1");
-        attributes.put("Speed", speed);
-        attributes.put("Heading", heading);
-
-        Point point = new Point(1,51, SpatialReferences.getWgs84());
-
-        Feature feature = table.createFeature(attributes, point);
-
-        // check if feature can be added to feature table
-        if (table.canAdd()) {
-            // add the new feature to the feature table and to server
-            var future = table.addFeatureAsync(feature);
-            future.addDoneListener(() -> {
-                System.out.println("added feature done");
-                System.out.println("local edits " + table.hasLocalEdits());
-            });
-
-        } else {
-            System.out.println("Cannot add a feature to this feature table");
-        }
-
-    }
-
+    /**
+     * A method to open the offline geodatabase used to collect GPS tracks.
+     */
     private void openGeodatabase() {
         geodatabase = new Geodatabase("./gpsdata.geodatabase");
 
@@ -275,35 +240,33 @@ public class GPS_Logger extends Application {
         });
     }
 
+    /**
+     * A method to download an offline geodatabase for collecting GPS tracks
+     */
     private void downloadOfflineDB() {
         System.out.println("downloading gdb");
 
+        // sync task connecting to the feature service
         syncTask = new GeodatabaseSyncTask(featureLayerURL);
 
+        // load and listen for task to be ready
         syncTask.loadAsync();
         syncTask.addDoneLoadingListener(()-> {
-            System.out.println("load status " + syncTask.getLoadStatus());
 
+            // creating parameters for requesting an empty geodatabase from the service
             Envelope envelope = new Envelope(0,0,0,0, SpatialReferences.getWebMercator());
-
             var paramsFuture = syncTask.createDefaultGenerateGeodatabaseParametersAsync(envelope);
             paramsFuture.addDoneListener(()-> {
-                System.out.println("params loaded ");
                 try {
+                    // get the parameters and request the geodatabase
                     GenerateGeodatabaseParameters parameters = paramsFuture.get();
-                    var layerOptions = parameters.getLayerOptions();
-                    for (var option : layerOptions) {
-                        System.out.println("layer option " + option.getLayerId());
-                    }
-
                     generateGeodatabaseJob = syncTask.generateGeodatabase(parameters, "./gpsdata.geodatabase");
-
                     generateGeodatabaseJob.start();
                     generateGeodatabaseJob.addJobDoneListener(()-> {
-                        System.out.println("job status :" + generateGeodatabaseJob.getStatus());
-
                         if (generateGeodatabaseJob.getStatus() == Job.Status.FAILED) {
                             System.out.println("error :" + generateGeodatabaseJob.getError().getMessage());
+                        } else {
+                            System.out.println("Geodatabase downloaded");
                         }
                     });
                 } catch (InterruptedException e) {
@@ -314,6 +277,12 @@ public class GPS_Logger extends Application {
             });
         });
     }
+
+    /**
+     * Method to initialise the serial port for reading the NMEA sentences.
+     *
+     * @param nmeaLocationDataSource the nmea data source which will be provided the nmea sentences
+     */
 
     private void initGPS(NmeaLocationDataSource nmeaLocationDataSource) {
         System.out.println("Starting serial...");

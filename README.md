@@ -2,7 +2,7 @@
 
 This project is a demonstration of an IoT GPS data logger which integrates into the ArcGIS platform.
 
-It has been designed to work on a Raspberry Pi Model 4B with a GPS receiver.
+It has been designed to work on a Raspberry Pi Model 3B+ (or higher model) with a USB GPS receiver.
 
 The project uses an early adopter version of the ArcGIS Maps SDK for Java specifically compiled to work with Arm Linux platforms such as the Raspberry Pi or Jenson Orin units.  The Maps SDK for Arm Linux can be requested by emailing ARM64LinuxNative@esri.com.  This will install the libraries needed for this app in a Maven Local instance.  This is a temporary way of getting the SDK whilst it is in Beta.  Subsequent releases will be available in a public maven repository.
 
@@ -14,26 +14,14 @@ The app launches a window displaying a map.
 
 ## Instructions
 
-### IntelliJ IDEA
+1. Set up your Raspberry Pi by following the instructions in this page.
+2. Create a `dev` directory in your home directory using the command line: `mkdir dev`
+3. open the directory by entering `cd dev`
+4. Clone the repository by entering `git clone https://github.com/mbcoder/gps-logger.git`
+5. The app can be run by entering `sudo ./gradlew run`
 
-1. Open IntelliJ IDEA and select _File > Open..._.
-2. Choose the java-gradle-starter-project directory and click _OK_.
-3. Select _File > Project Structure..._ and ensure that the Project SDK and language level are set to use Java 11.
-4. Open the Gradle view with _View > Tool Windows > Gradle_.
-5. In the Gradle view, double-click `copyNatives` under _Tasks > build_. This will unpack the native library dependencies to $USER_HOME/.arcgis.
-6. In the Gradle view, double-click `run` under _Tasks > application_ to run the app.
+Note that the application need to be be run using `sudo` so that the Pi4J libraries have sufficient permission to access the Raspberry Pi hardware.
 
-
-### Command Line
-
-1. `cd` into the project's root directory.
-2. Run `./gradlew clean build` on Linux/Mac or `gradlew.bat clean build` on Windows.
-3. Run `./gradlew copyNatives` on Linux/Mac or `gradlew.bat copyNatives` on Windows. This will unpack the native library dependencies to $USER_HOME.arcgis.
-4. Run `./gradlew run` on Linux/Mac or `gradlew.bat run` on Windows to run the app.
-
-## Requirements
-
-See the Java Maps SDK [system requirements](https://developers.arcgis.com/java/reference/system-requirements/).
 
 ## Resources
 

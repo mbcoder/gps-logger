@@ -4,8 +4,11 @@ import com.esri.arcgisruntime.location.NmeaLocationDataSource;
 import com.pi4j.io.serial.Serial;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 
+/**
+ * A class for receiving byte data received on a serial port which contains NMEA sentences.  The NMEA sentences will be passed by a provided
+ * NmeaLocationDataSource which will provide location information from the connected GPS device.
+ */
 public class SerialReader implements Runnable {
 
   //private final Console console;
@@ -14,62 +17,40 @@ public class SerialReader implements Runnable {
 
   private boolean continueReading = true;
 
+  /**
+   * Constructor the serial reader which takes a serial port and a location data source
+   *
+   * @param serial port for GPS
+   * @param nmeaLocationDataSource location data source for processing NMEA sentences
+   */
   public SerialReader(Serial serial, NmeaLocationDataSource nmeaLocationDataSource) {
     this.serial = serial;
     this.nmeaLocationDataSource = nmeaLocationDataSource;
   }
 
+  /**
+   * Method to stop reading from the serial port
+   */
   public void stopReading() {
     continueReading = false;
   }
 
   @Override
   public void run() {
-    // We use a buffered reader to handle the data received from the serial port
+    // fpr reading data from the serial port
     BufferedReader br = new BufferedReader(new InputStreamReader(serial.getInputStream()));
 
     try {
-      // Data from the GPS is recieved in lines
-      String line = "";
 
-      // Read data until the flag is false
+      // Read data
       while (continueReading) {
-        // First we need to check if there is data available to read.
-        // The read() command for pigio-serial is a NON-BLOCKING call,
-        // in contrast to typical java input streams.
+        // check if there is serial data ready to read
         var available = serial.available();
 
+        // if there is data then send it do the nmeaLocationDataSource for processing
         if (available > 0) {
-          //byte b = (byte) br.read();
-
-          //byte[] ba = new byte[1];
-          //ba[0] = b;
-          //nmeaLocationDataSource.pushData(ba);
-
           byte[] bytes = {(byte) br.read()};
           nmeaLocationDataSource.pushData(bytes);
-
-          /*
-
-          for (int i = 0; i < available; i++) {
-            byte b = (byte) br.read();
-            if (b < 32) {
-              // All non-string bytes are handled as line breaks
-              if (!line.isEmpty()) {
-                line += (char) b;
-                // Here we should add code to parse the data to a GPS data object
-                //System.out.println(line);
-                nmeaLocationDataSource.pushData(line.getBytes(StandardCharsets.UTF_8));
-                line = "";
-              }
-            } else {
-              line += (char) b;
-            }
-
-
-          }
-
-           */
 
 
         } else {
