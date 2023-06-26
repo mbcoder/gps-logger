@@ -1,12 +1,12 @@
 /**
  * Copyright 2023 Esri
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
  * of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -50,7 +50,6 @@ import javafx.stage.Stage;
 
 public class GPS_Logger extends Application {
 
-    private Context pi4j;
     private Serial serial;
     private SerialReader serialReader;
     private final String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
@@ -76,7 +75,7 @@ public class GPS_Logger extends Application {
         // set the title and size of the stage and show it
         stage.setTitle("GPS Logger");
         stage.setWidth(800);
-        stage.setHeight(700);
+        stage.setHeight(100);
         stage.show();
 
         // create a JavaFX scene with a stack pane as the root node and add it to the scene
@@ -111,23 +110,19 @@ public class GPS_Logger extends Application {
 
         // Button to open the serial port and start processing GPS data
         Button btnStartGPSUpdate = new Button("start GPS");
-        btnStartGPSUpdate.setOnAction(event -> {
-            startGPSUpdate();
-        });
+        btnStartGPSUpdate.setOnAction(event -> startGPSUpdate());
         hBox.getChildren().add(btnStartGPSUpdate);
 
         // Button to start recording the GPS position to offline gdb every 10 seconds
         Button btnStartLogger = new Button("start logging");
-        btnStartLogger.setOnAction(event -> {
-            startLogging();
-        });
+        btnStartLogger.setOnAction(event -> startLogging());
         hBox.getChildren().add(btnStartLogger);
 
     }
 
     /**
      * Method to start logging GPS data into the geodatabase.
-     *
+     * <p>
      * GPS data is reported very frequently, but this method only records new
      * data at least every 10 seconds to limit the amount of data recorded.
      */
@@ -153,7 +148,7 @@ public class GPS_Logger extends Application {
 
     /**
      * Method to connect to the serial port with the UDB GPS device and listen for incoming NMEA sentenses
-     *
+     * <p>
      * When NMEA data is received, this is processed by the NMEALocationDataSource class to provide location information.
      */
     private void startGPSUpdate() {
@@ -202,16 +197,10 @@ public class GPS_Logger extends Application {
                 try {
                     var syncJob  = syncTask.syncGeodatabase(syncParamsFuture.get(), geodatabase);
                     syncJob.start();
-                    syncJob.addJobDoneListener(()-> {
-                        System.out.println("sync job done status " + syncJob.getStatus());
-                    });
+                    syncJob.addJobDoneListener(()-> System.out.println("sync job done status " + syncJob.getStatus()));
 
-                    syncJob.addProgressChangedListener(()-> {
-                        System.out.println("progress!");
-                    });
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
+                    syncJob.addProgressChangedListener(()-> System.out.println("progress!"));
+                } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                 }
             });
@@ -278,9 +267,7 @@ public class GPS_Logger extends Application {
                             System.out.println("Geodatabase downloaded");
                         }
                     });
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                 }
             });
@@ -296,7 +283,7 @@ public class GPS_Logger extends Application {
     private void initGPS(NmeaLocationDataSource nmeaLocationDataSource) {
         System.out.println("Starting serial...");
 
-        pi4j = Pi4J.newAutoContext();
+        Context pi4j = Pi4J.newAutoContext();
 
         serial = pi4j.create(Serial.newConfigBuilder(pi4j)
             .baud(Baud._4800)
