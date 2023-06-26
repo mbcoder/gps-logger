@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Esri
+ * Copyright 2023 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -53,7 +53,7 @@ public class GPS_Logger extends Application {
     private Context pi4j;
     private Serial serial;
     private SerialReader serialReader;
-    private String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
+    private final String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
 
     private Geodatabase geodatabase;
     private GeodatabaseFeatureTable table;
@@ -89,9 +89,7 @@ public class GPS_Logger extends Application {
 
         // Button to get offline geodatabase
         Button btnGetGDB = new Button("Get offline gdb");
-        btnGetGDB.setOnAction(event -> {
-            downloadOfflineDB();
-        });
+        btnGetGDB.setOnAction(event -> downloadOfflineDB());
         hBox.getChildren().add(btnGetGDB);
 
         // Button to open offline geodatabase
@@ -257,18 +255,20 @@ public class GPS_Logger extends Application {
         syncTask.loadAsync();
         syncTask.addDoneLoadingListener(()-> {
 
-            // creating parameters for requesting an empty geodatabase from the service
+            // creating parameters for requesting an empty geodatabase from the service.
+            // The envelope below allows for data to be collected anywhere in the world.
             Envelope envelope = new Envelope(-180,-90,180,90, SpatialReferences.getWgs84());
             var paramsFuture = syncTask.createDefaultGenerateGeodatabaseParametersAsync(envelope);
             paramsFuture.addDoneListener(()-> {
                 try {
-                    // get the default parameters and request the geodatabase
+                    // get the default parameters
                     GenerateGeodatabaseParameters parameters = paramsFuture.get();
                     parameters.setSyncModel(SyncModel.PER_LAYER);
 
                     // set the layer option, so it only gets the schema (not data)
                     parameters.getLayerOptions().get(0).setQueryOption(GenerateLayerOption.QueryOption.NONE);
 
+                    // request the geodatabase with the task
                     generateGeodatabaseJob = syncTask.generateGeodatabase(parameters, "./gpsdata.geodatabase");
                     generateGeodatabaseJob.start();
                     generateGeodatabaseJob.addJobDoneListener(()-> {
