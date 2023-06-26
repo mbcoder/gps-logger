@@ -168,6 +168,7 @@ public class GPS_Logger extends Application {
             System.out.println("adding location changed listener");
             // listener for location updates
             nmeaLocationDataSource.addLocationChangedListener(listener -> {
+                System.out.print(".");
 
                 // create default attributes for the feature
                 Map<String, Object> attributes = new HashMap<>();
