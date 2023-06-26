@@ -172,7 +172,7 @@ public class GPS_Logger extends Application {
 
                 // create default attributes for the feature
                 Map<String, Object> attributes = new HashMap<>();
-                attributes.put("TrackID", "GPS Test");
+                attributes.put("TrackID", "GPS Test 2");
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
