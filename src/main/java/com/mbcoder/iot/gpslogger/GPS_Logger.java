@@ -131,7 +131,7 @@ public class GPS_Logger extends Application {
      * Method to start logging GPS data into the geodatabase.
      *
      * GPS data is reported very frequently, but this method only records new
-     * data at least every 10 seconds to limit the amont of data recorded.
+     * data at least every 10 seconds to limit the amount of data recorded.
      */
     private void startLogging() {
         loggingTimer = new Timer();
@@ -258,7 +258,7 @@ public class GPS_Logger extends Application {
         syncTask.addDoneLoadingListener(()-> {
 
             // creating parameters for requesting an empty geodatabase from the service
-            Envelope envelope = new Envelope(-180,180,-90,90, SpatialReferences.getWgs84());
+            Envelope envelope = new Envelope(-180,-90,180,90, SpatialReferences.getWgs84());
             var paramsFuture = syncTask.createDefaultGenerateGeodatabaseParametersAsync(envelope);
             paramsFuture.addDoneListener(()-> {
                 try {
