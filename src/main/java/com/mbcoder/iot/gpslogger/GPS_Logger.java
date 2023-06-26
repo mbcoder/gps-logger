@@ -20,12 +20,14 @@ import com.esri.arcgisruntime.concurrent.Job;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.Geodatabase;
 import com.esri.arcgisruntime.data.GeodatabaseFeatureTable;
+import com.esri.arcgisruntime.data.SyncModel;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.location.NmeaLocationDataSource;
 import com.esri.arcgisruntime.tasks.geodatabase.GenerateGeodatabaseJob;
 import com.esri.arcgisruntime.tasks.geodatabase.GenerateGeodatabaseParameters;
+import com.esri.arcgisruntime.tasks.geodatabase.GenerateLayerOption;
 import com.esri.arcgisruntime.tasks.geodatabase.GeodatabaseSyncTask;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
@@ -236,6 +238,7 @@ public class GPS_Logger extends Application {
                     System.out.println("field : " + field.getName());
                 }
                 System.out.println("local edits " + table.hasLocalEdits());
+                System.out.println("feature count " + table.getTotalFeatureCount());
             });
         });
     }
@@ -254,12 +257,17 @@ public class GPS_Logger extends Application {
         syncTask.addDoneLoadingListener(()-> {
 
             // creating parameters for requesting an empty geodatabase from the service
-            Envelope envelope = new Envelope(0,0,0,0, SpatialReferences.getWebMercator());
+            Envelope envelope = new Envelope(-180,180,-90,90, SpatialReferences.getWgs84());
             var paramsFuture = syncTask.createDefaultGenerateGeodatabaseParametersAsync(envelope);
             paramsFuture.addDoneListener(()-> {
                 try {
-                    // get the parameters and request the geodatabase
+                    // get the default parameters and request the geodatabase
                     GenerateGeodatabaseParameters parameters = paramsFuture.get();
+                    parameters.setSyncModel(SyncModel.PER_LAYER);
+
+                    // set the layer option, so it only gets the schema (not data)
+                    parameters.getLayerOptions().get(0).setQueryOption(GenerateLayerOption.QueryOption.NONE);
+
                     generateGeodatabaseJob = syncTask.generateGeodatabase(parameters, "./gpsdata.geodatabase");
                     generateGeodatabaseJob.start();
                     generateGeodatabaseJob.addJobDoneListener(()-> {
