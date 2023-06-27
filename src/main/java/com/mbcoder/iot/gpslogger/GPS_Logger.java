@@ -147,7 +147,7 @@ public class GPS_Logger extends Application {
     }
 
     /**
-     * Method to connect to the serial port with the UDB GPS device and listen for incoming NMEA sentenses
+     * Method to connect to the serial port with the UDB GPS device and listen for incoming NMEA sentences
      * <p>
      * When NMEA data is received, this is processed by the NMEALocationDataSource class to provide location information.
      */
@@ -169,7 +169,7 @@ public class GPS_Logger extends Application {
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
-                // Copy the location into a Point class ready for creating an updated fature
+                // Copy the location into a Point class ready for creating an updated feature
                 Point latestPoint = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
 
                 // update the latest position feature
