@@ -67,8 +67,6 @@ public class SerialReader implements Runnable {
         if (available > 0) {
           byte[] bytes = {(byte) br.read()};
           nmeaLocationDataSource.pushData(bytes);
-
-
         } else {
           Thread.sleep(10);
         }
