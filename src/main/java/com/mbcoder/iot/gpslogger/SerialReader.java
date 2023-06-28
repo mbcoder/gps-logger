@@ -53,7 +53,7 @@ public class SerialReader implements Runnable {
 
   @Override
   public void run() {
-    // fpr reading data from the serial port
+    // for reading data from the serial port
     BufferedReader br = new BufferedReader(new InputStreamReader(serial.getInputStream()));
 
     try {
