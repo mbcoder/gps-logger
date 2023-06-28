@@ -169,8 +169,11 @@ public class GPS_Logger extends Application {
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
+                // testing potential bug
+                Point latestPoint = listener.getLocation().getPosition();
+
                 // Copy the location into a Point class ready for creating an updated feature
-                Point latestPoint = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
+                //Point latestPoint = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
 
                 // update the latest position feature
                 latestPosition = table.createFeature(attributes, latestPoint);
