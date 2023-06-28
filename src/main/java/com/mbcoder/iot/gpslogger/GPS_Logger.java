@@ -295,7 +295,6 @@ public class GPS_Logger extends Application {
      *
      * @param nmeaLocationDataSource the nmea data source which will be provided with the nmea sentences
      */
-
     private void initGPS(NmeaLocationDataSource nmeaLocationDataSource) {
         System.out.println("Starting serial...");
 
