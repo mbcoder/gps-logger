@@ -82,13 +82,14 @@ public class GPS_Logger extends Application {
         stage.setTitle("GPS Logger");
         stage.setWidth(800);
         stage.setHeight(100);
-        stage.show();
 
         // create a JavaFX scene with a stack pane as the root node and add it to the scene
         StackPane stackPane = new StackPane();
         Scene scene = new Scene(stackPane);
         stage.setScene(scene);
+        stage.show();
 
+        // hbox for the buttons
         HBox hBox = new HBox();
         stackPane.getChildren().add(hBox);
 
