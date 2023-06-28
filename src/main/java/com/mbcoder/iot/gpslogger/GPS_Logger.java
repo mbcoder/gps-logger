@@ -22,8 +22,8 @@ import com.esri.arcgisruntime.data.Geodatabase;
 import com.esri.arcgisruntime.data.GeodatabaseFeatureTable;
 import com.esri.arcgisruntime.data.SyncModel;
 import com.esri.arcgisruntime.geometry.Envelope;
-import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
+import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.location.NmeaLocationDataSource;
 import com.esri.arcgisruntime.tasks.geodatabase.GenerateGeodatabaseJob;
 import com.esri.arcgisruntime.tasks.geodatabase.GenerateGeodatabaseParameters;
@@ -48,6 +48,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+/**
+ * An application for logging GPS locations to an offline geodatabase
+ */
 public class GPS_Logger extends Application {
 
     private Serial serial;
@@ -58,6 +61,9 @@ public class GPS_Logger extends Application {
     private GeodatabaseFeatureTable table;
     private GenerateGeodatabaseJob generateGeodatabaseJob;
     private GeodatabaseSyncTask syncTask;
+    private Button btnSync;
+    private Button btnStartGPSUpdate;
+    private Button btnStartLogger;
 
     private Feature latestPosition;  // the latest position read from the GPS
     private boolean featureUpdated = false;  // flag set to true every time we update the latestPosition from the GPS.
@@ -87,9 +93,9 @@ public class GPS_Logger extends Application {
         stackPane.getChildren().add(hBox);
 
         // Button to get offline geodatabase
-        Button btnGetGDB = new Button("Get offline gdb");
-        btnGetGDB.setOnAction(event -> downloadOfflineDB());
-        hBox.getChildren().add(btnGetGDB);
+        Button btnDownloadOfflineGDB = new Button("Get offline gdb");
+        btnDownloadOfflineGDB.setOnAction(event -> downloadOfflineGDB());
+        hBox.getChildren().add(btnDownloadOfflineGDB);
 
         // Button to open offline geodatabase
         Button btnOpenGDB = new Button("open offline gdb");
@@ -100,22 +106,24 @@ public class GPS_Logger extends Application {
         hBox.getChildren().add(btnOpenGDB);
 
         // Button to sync gps positions collected into the hosted feature service
-        Button btnSync = new Button("Sync data");
+        btnSync = new Button("Sync data");
         btnSync.setOnAction(event -> {
             System.out.println("sync data");
             syncGeodatabase();
-
         });
+        btnSync.setDisable(true);
         hBox.getChildren().add(btnSync);
 
         // Button to open the serial port and start processing GPS data
-        Button btnStartGPSUpdate = new Button("start GPS");
+        btnStartGPSUpdate = new Button("start GPS");
         btnStartGPSUpdate.setOnAction(event -> startGPSUpdate());
+        btnStartGPSUpdate.setDisable(true);
         hBox.getChildren().add(btnStartGPSUpdate);
 
         // Button to start recording the GPS position to offline gdb every 10 seconds
-        Button btnStartLogger = new Button("start logging");
+        btnStartLogger = new Button("start logging");
         btnStartLogger.setOnAction(event -> startLogging());
+        btnStartLogger.setDisable(true);
         hBox.getChildren().add(btnStartLogger);
     }
 
@@ -168,9 +176,6 @@ public class GPS_Logger extends Application {
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
-                // Copy the location into a Point class ready for creating an updated feature
-                //Point latestPoint = listener.getLocation().getPosition();
-
                 // update the latest position feature
                 latestPosition = table.createFeature(attributes, listener.getLocation().getPosition());
 
@@ -209,6 +214,7 @@ public class GPS_Logger extends Application {
 
     /**
      * A method to open the offline geodatabase used to collect GPS tracks.
+     *
      */
     private void openGeodatabase() {
         geodatabase = new Geodatabase("./gpsdata.geodatabase");
@@ -217,23 +223,33 @@ public class GPS_Logger extends Application {
         geodatabase.addDoneLoadingListener(()-> {
             System.out.println("gdb load status :" + geodatabase.getLoadStatus());
 
-            table = geodatabase.getGeodatabaseFeatureTableByServiceLayerId(0);
-            table.loadAsync();
-            table.addDoneLoadingListener(()-> {
-                System.out.println("opening table " + table.getDisplayName());
-                for (var field : table.getFields()) {
-                    System.out.println("field : " + field.getName());
-                }
-                System.out.println("local edits " + table.hasLocalEdits());
-                System.out.println("feature count " + table.getTotalFeatureCount());
-            });
+            if (geodatabase.getLoadStatus() == LoadStatus.LOADED) {
+
+                table = geodatabase.getGeodatabaseFeatureTableByServiceLayerId(0);
+                table.loadAsync();
+                table.addDoneLoadingListener(() -> {
+                    System.out.println("opening table " + table.getDisplayName());
+                    for (var field : table.getFields()) {
+                        System.out.println("field : " + field.getName());
+                    }
+                    System.out.println("local edits " + table.hasLocalEdits());
+                    System.out.println("feature count " + table.getTotalFeatureCount());
+
+                    // enable UI components using the geodatabase
+                    btnStartLogger.setDisable(false);
+                    btnSync.setDisable(false);
+                    btnStartGPSUpdate.setDisable(false);
+                });
+            } else {
+                System.out.println("error loading geodatabase");
+            }
         });
     }
 
     /**
      * A method to download an offline geodatabase for collecting GPS tracks
      */
-    private void downloadOfflineDB() {
+    private void downloadOfflineGDB() {
         System.out.println("downloading gdb");
 
         // sync task connecting to the feature service

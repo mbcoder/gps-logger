@@ -8,10 +8,6 @@ The project uses an early adopter version of the ArcGIS Maps SDK for Java specif
 
 The project includes the Gradle wrapper, so there is no need to install Gradle to run the app.
 
-The app launches a window displaying a map.
-
-![screenshot](screenshot.png)
-
 ## Instructions
 
 1. Set up your Raspberry Pi by following the instructions in this [page](Raspberry%20Pi%20Setup.md).
