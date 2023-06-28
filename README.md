@@ -20,7 +20,7 @@ The app launches a window displaying a map.
 4. Clone the repository by entering `git clone https://github.com/mbcoder/gps-logger.git`
 5. The app can be run by entering `sudo ./gradlew run`
 
-Note that the application need to be be run using `sudo` so that the Pi4J libraries have sufficient permission to access the Raspberry Pi hardware.
+Note that the application needs to be run using `sudo` so that the Pi4J libraries have sufficient permission to access the Raspberry Pi hardware.
 
 
 ## Resources
