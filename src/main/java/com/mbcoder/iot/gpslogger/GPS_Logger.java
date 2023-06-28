@@ -322,7 +322,6 @@ public class GPS_Logger extends Application {
                 }
             }
 
-            //opened now!
             System.out.println("serial port is open!");
 
             // Start a thread to handle the incoming data from the serial port

@@ -26,8 +26,6 @@ import java.io.InputStreamReader;
  * NmeaLocationDataSource which will provide location information from the connected GPS device.
  */
 public class SerialReader implements Runnable {
-
-  //private final Console console;
   private final Serial serial;
   private NmeaLocationDataSource nmeaLocationDataSource;
 
