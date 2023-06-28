@@ -293,7 +293,7 @@ public class GPS_Logger extends Application {
     /**
      * Method to initialise the serial port for reading the NMEA sentences.
      *
-     * @param nmeaLocationDataSource the nmea data source which will be provided the nmea sentences
+     * @param nmeaLocationDataSource the nmea data source which will be provided with the nmea sentences
      */
 
     private void initGPS(NmeaLocationDataSource nmeaLocationDataSource) {
