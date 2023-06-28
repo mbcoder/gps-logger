@@ -171,9 +171,11 @@ public class GPS_Logger extends Application {
 
                 // testing potential bug
                 Point latestPoint = listener.getLocation().getPosition();
+                System.out.println("json " + latestPoint.toJson());
 
                 // Copy the location into a Point class ready for creating an updated feature
-                //Point latestPoint = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
+                Point latestPoint2 = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
+                System.out.println("json2 " + latestPoint2);
 
                 // update the latest position feature
                 latestPosition = table.createFeature(attributes, latestPoint);
