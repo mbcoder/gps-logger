@@ -52,7 +52,8 @@ public class GPS_Logger extends Application {
 
     private Serial serial;
     private SerialReader serialReader;
-    private final String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
+    //private final String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
+    private final String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Locations/FeatureServer";
 
     private Geodatabase geodatabase;
     private GeodatabaseFeatureTable table;
@@ -174,8 +175,8 @@ public class GPS_Logger extends Application {
                 System.out.println("json -> " + latestPoint.toJson());
 
                 // Copy the location into a Point class ready for creating an updated feature
-                Point latestPoint2 = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
-                System.out.println("json2 -> " + latestPoint2.toJson());
+                //Point latestPoint2 = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
+                //System.out.println("json2 -> " + latestPoint2.toJson());
 
                 // update the latest position feature
                 latestPosition = table.createFeature(attributes, latestPoint);
@@ -185,25 +186,6 @@ public class GPS_Logger extends Application {
             });
         });
     }
-
-    /*
-    adding location changed listener
-.json {"x":-2.6833500000000003,"y":56.054794999999999,"z":104.90000000000001,"spatialReference":{"wkid":4326,"vcsWkid":115700}}
-json2 Point: [-2.683350, 56.054795, 0.000000, NaN] SR: 4326
-.json {"x":-2.6833500000000003,"y":56.054794999999999,"z":104.90000000000001,"spatialReference":{"wkid":4326,"vcsWkid":115700}}
-json2 Point: [-2.683350, 56.054795, 0.000000, NaN] SR: 4326
-.json {"x":-2.6833500000000003,"y":56.054794999999999,"z":104.90000000000001,"spatialReference":{"wkid":4326,"vcsWkid":115700}}
-json2 Point: [-2.683350, 56.054795, 0.000000, NaN] SR: 4326
-.json {"x":-2.6833500000000003,"y":56.054794999999999,"z":104.90000000000001,"spatialReference":{"wkid":4326,"vcsWkid":115700}}
-json2 Point: [-2.683350, 56.054795, 0.000000, NaN] SR: 4326
-.json {"x":-2.6833500000000003,"y":56.054794999999999,"z":104.90000000000001,"spatialReference":{"wkid":4326,"vcsWkid":115700}}
-json2 Point: [-2.683350, 56.054795, 0.000000, NaN] SR: 4326
-.json {"x":-2.6833500000000003,"y":56.054794999999999,"z":104.90000000000001,"spatialReference":{"wkid":4326,"vcsWkid":115700}}
-json2 Point: [-2.683350, 56.054795, 0.000000, NaN] SR: 4326
-
-
-
-     */
 
     /**
      * A method to sync gps data collected whilst offline into the hosted feature service.   This process will be called
