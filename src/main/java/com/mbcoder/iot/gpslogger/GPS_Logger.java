@@ -99,7 +99,7 @@ public class GPS_Logger extends Application {
         hBox.getChildren().add(btnDownloadOfflineGDB);
 
         // Button to open offline geodatabase
-        Button btnOpenGDB = new Button("open offline gdb");
+        Button btnOpenGDB = new Button("Open offline gdb");
         btnOpenGDB.setOnAction(event -> {
             System.out.println("opening gdb");
             openGeodatabase();
