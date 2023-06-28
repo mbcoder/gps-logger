@@ -63,7 +63,7 @@ public class SerialReader implements Runnable {
         // check if there is serial data ready to read
         var available = serial.available();
 
-        // if there is data then send it do the nmeaLocationDataSource for processing
+        // if there is data then send it to the nmeaLocationDataSource for processing
         if (available > 0) {
           byte[] bytes = {(byte) br.read()};
           nmeaLocationDataSource.pushData(bytes);
