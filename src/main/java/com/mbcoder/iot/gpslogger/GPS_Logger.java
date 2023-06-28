@@ -89,7 +89,7 @@ public class GPS_Logger extends Application {
         stage.setScene(scene);
         stage.show();
 
-        // hbox for the buttons
+        // Hbox for the buttons
         HBox hBox = new HBox();
         stackPane.getChildren().add(hBox);
 
@@ -106,15 +106,6 @@ public class GPS_Logger extends Application {
         });
         hBox.getChildren().add(btnOpenGDB);
 
-        // Button to sync gps positions collected into the hosted feature service
-        btnSync = new Button("Sync data");
-        btnSync.setOnAction(event -> {
-            System.out.println("sync data");
-            syncGeodatabase();
-        });
-        btnSync.setDisable(true);
-        hBox.getChildren().add(btnSync);
-
         // Button to open the serial port and start processing GPS data
         btnStartGPSUpdate = new Button("start GPS");
         btnStartGPSUpdate.setOnAction(event -> startGPSUpdate());
@@ -126,6 +117,15 @@ public class GPS_Logger extends Application {
         btnStartLogger.setOnAction(event -> startLogging());
         btnStartLogger.setDisable(true);
         hBox.getChildren().add(btnStartLogger);
+
+        // Button to sync gps positions collected into the hosted feature service
+        btnSync = new Button("Sync data");
+        btnSync.setOnAction(event -> {
+            System.out.println("sync data");
+            syncGeodatabase();
+        });
+        btnSync.setDisable(true);
+        hBox.getChildren().add(btnSync);
     }
 
     /**
