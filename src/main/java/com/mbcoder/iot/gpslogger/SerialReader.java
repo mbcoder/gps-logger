@@ -34,7 +34,7 @@ public class SerialReader implements Runnable {
   private boolean continueReading = true;
 
   /**
-   * Constructor the serial reader which takes a serial port and a location data source
+   * Constructor for the serial reader which takes a serial port and a location data source
    *
    * @param serial port for GPS
    * @param nmeaLocationDataSource location data source for processing NMEA sentences
