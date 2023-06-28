@@ -52,7 +52,6 @@ public class GPS_Logger extends Application {
 
     private Serial serial;
     private SerialReader serialReader;
-    //private final String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Tracks/FeatureServer";
     private final String featureLayerURL = "https://services1.arcgis.com/6677msI40mnLuuLr/arcgis/rest/services/GPS_Locations/FeatureServer";
 
     private Geodatabase geodatabase;
@@ -118,7 +117,6 @@ public class GPS_Logger extends Application {
         Button btnStartLogger = new Button("start logging");
         btnStartLogger.setOnAction(event -> startLogging());
         hBox.getChildren().add(btnStartLogger);
-
     }
 
     /**
@@ -170,16 +168,11 @@ public class GPS_Logger extends Application {
                 attributes.put("Speed", listener.getLocation().getVelocity());
                 attributes.put("Heading", listener.getLocation().getCourse());
 
-                // testing potential bug
-                Point latestPoint = listener.getLocation().getPosition();
-                System.out.println("json -> " + latestPoint.toJson());
-
                 // Copy the location into a Point class ready for creating an updated feature
-                //Point latestPoint2 = new Point(listener.getLocation().getPosition().getX(), listener.getLocation().getPosition().getY(), listener.getLocation().getPosition().getSpatialReference());
-                //System.out.println("json2 -> " + latestPoint2.toJson());
+                //Point latestPoint = listener.getLocation().getPosition();
 
                 // update the latest position feature
-                latestPosition = table.createFeature(attributes, latestPoint);
+                latestPosition = table.createFeature(attributes, listener.getLocation().getPosition());
 
                 // set flag to say there is a position update
                 featureUpdated = true;
