@@ -16,7 +16,7 @@ The app launches a window displaying a map.
 
 1. Set up your Raspberry Pi by following the instructions in this [page](Raspberry%20Pi%20Setup.md).
 2. Create a `dev` directory in your home directory using the command line: `mkdir dev`
-3. open the directory by entering `cd dev`
+3. Open the directory by entering `cd dev`
 4. Clone the repository by entering `git clone https://github.com/mbcoder/gps-logger.git`
 5. The app can be run by entering `sudo ./gradlew run`
 
