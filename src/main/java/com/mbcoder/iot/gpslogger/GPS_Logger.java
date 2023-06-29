@@ -155,7 +155,7 @@ public class GPS_Logger extends Application {
     }
 
     /**
-     * Method to connect to the serial port with the UDB GPS device and listen for incoming NMEA sentences
+     * Method to connect to the serial port with the USB GPS device and listen for incoming NMEA sentences
      * <p>
      * When NMEA data is received, this is processed by the NMEALocationDataSource class to provide location information.
      */
