@@ -1,6 +1,6 @@
 # GPS Logger project
 
-This project is a demonstration of an IoT GPS data logger which integrates into the ArcGIS platform.
+This project is a demonstration of an IoT GPS data logger which integrates into the ArcGIS platform.  It was featured in this [blog](https://www.esri.com/arcgis-blog/overview/) post which gives more details of the developer technology we have used.
 
 It has been designed to work on a Raspberry Pi Model 3B+ (or higher model) with a USB GPS receiver.
 
