@@ -1,10 +1,12 @@
 # GPS Logger project
 
-This project is a demonstration of an IoT GPS data logger which integrates into the ArcGIS platform.  It was featured in this [blog](https://www.esri.com/arcgis-blog/overview/) post which gives more details of the developer technology we have used.
+This project is a demonstration of an IoT GPS data logger which integrates into the ArcGIS platform.  It was featured in this [blog](https://www.esri.com/arcgis-blog/products/sdk-java/developers/how-to-use-the-arcgis-maps-sdk-for-java-in-a-raspberry-pi-for-recording-gps-tracks/) post which gives more details of the developer technology we have used.
 
 It has been designed to work on a Raspberry Pi Model 3B+ (or higher model) with a USB GPS receiver.
 
 The project uses an early adopter version of the ArcGIS Maps SDK for Java specifically compiled to work with Arm Linux platforms such as the Raspberry Pi or Jenson Orin units.  The Java Maps SDK with support for Arm Linux can be requested by emailing ARM64LinuxNative@esri.com.  This will install the libraries needed for this app in a Maven Local instance.  This is a temporary way of getting the SDK whilst it is in Beta.  Subsequent releases will be available in a public maven repository.
+
+![GPS Logger](GPS%20Logger.png)
 
 The project includes the Gradle wrapper, so there is no need to install Gradle to run the app.
 
