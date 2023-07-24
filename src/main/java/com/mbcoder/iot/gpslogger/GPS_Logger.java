@@ -44,6 +44,7 @@ import java.util.concurrent.ExecutionException;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -69,9 +70,9 @@ public class GPS_Logger extends Application {
     private boolean featureUpdated = false;  // flag set to true every time we update the latestPosition from the GPS.
 
     private Timer loggingTimer; // timer for logging to local geodatabase
+    CheckBox chkCamera;
 
     public static void main(String[] args) {
-
         Application.launch(args);
     }
 
@@ -126,6 +127,11 @@ public class GPS_Logger extends Application {
         });
         btnSync.setDisable(true);
         hBox.getChildren().add(btnSync);
+
+        // checkbox to emable use of camera
+        chkCamera = new CheckBox("Use camera");
+        hBox.getChildren().add(chkCamera);
+
     }
 
     /**
